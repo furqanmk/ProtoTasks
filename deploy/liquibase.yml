@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+
+  liquibase:
+    container_name: task_liquibase
+    image: liquibase/liquibase:4.17
+    environment:
+      INSTALL_MYSQL: "true"
+    volumes:
+      - ../schema/liquibase/changelog:/liquibase/changelog
+    command: --url=jdbc:mysql://protobuf_db:3306/protobuf_db --username=admin --password=secret --changelog-file=changelog/changelog.yml --log-level=info update

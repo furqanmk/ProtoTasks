@@ -1,0 +1,93 @@
+syntax = "proto3";
+package task_manager;
+option go_package = "github.com/Wattpad/TaskManager/api/task_manager";
+
+import "google/protobuf/timestamp.proto";
+
+message Task {
+  int64 id = 1;
+  string title = 2;
+  string description = 3;
+  TaskStatus status = 4;
+  TaskDetails details = 5;
+  optional string assignee = 6;
+}
+
+message TaskDetails {
+  oneof details {
+    NotStartedDetails not_started_details = 1;
+    InProgressDetails in_progress_details = 2;
+    DoneTaskDetails done_details = 3;
+  }
+}
+
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_NOT_STARTED = 1;
+  TASK_STATUS_IN_PROGRESS = 2;
+  TASK_STATUS_DONE = 3;
+}
+
+message NotStartedDetails {
+ google.protobuf.Timestamp created_date = 1;
+}
+message InProgressDetails {
+  google.protobuf.Timestamp started_date = 1;
+}
+message DoneTaskDetails {
+  google.protobuf.Timestamp completed_date = 1;
+}
+
+// CREATE
+message CreateTaskRequest {
+  string title = 1;
+  string description = 2;
+  TaskStatus status = 3;
+  TaskDetails details = 4;
+}
+
+message CreateTaskResponse {
+  Task task = 1;
+}
+
+// GET
+message GetTaskRequest {
+  int64 id = 1;
+}
+
+message GetTaskResponse {
+  Task task = 1;
+}
+
+// UPDATE
+message UpdateTaskRequest {
+  Task task = 1;
+}
+
+message UpdateTaskResponse {
+  Task task = 1;
+}
+
+// DELETE
+message DeleteTaskRequest {
+  int64 id = 1;
+}
+
+message DeleteTaskResponse {
+  bool success = 1;
+}
+
+message GetAllTasksRequest {}
+
+message GetAllTasksResponse {
+  Task task = 1;
+}
+
+service TaskService {
+  rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse) {}
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse) {}
+  rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse) {}
+  rpc DeleteTask(DeleteTaskRequest) returns (DeleteTaskResponse) {}
+  rpc GetAllTasks(GetAllTasksRequest) returns (stream GetAllTasksResponse) {}
+  // rpc AssignTask(AssignTaskRequest) returns (AssignTaskResponse) {}
+}

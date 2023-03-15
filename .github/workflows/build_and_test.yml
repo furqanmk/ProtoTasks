@@ -1,0 +1,9 @@
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    uses: wattpad/github-workflows/.github/workflows/go-test-and-build.yml@main
+    secrets: inherit

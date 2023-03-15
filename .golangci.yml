@@ -1,0 +1,57 @@
+run:
+  go: '1.19'
+
+  # Which dirs to skip: issues from them won't be reported.
+  # Can use regexp here: `generated.*`, regexp is applied on full path.
+  skip-dirs:
+    - api
+    - mocks
+
+linters:
+  enable-all: true
+  disable:
+    # Deprecated
+    - deadcode
+    - exhaustivestruct
+    - ifshort
+    - interfacer
+    - maligned
+    - nosnakecase
+    - golint
+    - scopelint
+    - structcheck
+    - varcheck
+    - ireturn
+
+    # Unwanted
+    - exhaustruct   # prefer default initialization and brevity
+    - gofmt         # replaced by gofumpt
+    - goimports     # replaced by gci
+    - paralleltest  # requires special care
+
+linters-settings:
+  exhaustive:
+    default-signifies-exhaustive: true
+  gci:
+    sections:
+      - standard # Captures all standard packages if they do not match another section.
+      - default # Contains all imports that could not be matched to another section type.
+      - prefix(github.com/Wattpad) # All Wattpad imports
+  gofumpt:
+    lang-version: "1.19"
+    extra-rules: false
+  lll:
+    line-length: 132
+    tab-width: 4
+
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - bodyclose
+        - containedctx # test suite may want to track context
+        - forcetypeassert
+        - gomnd
+        - wrapcheck # we don't need to wrap errors in tests

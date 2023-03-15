@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - logicalFilePath: schema/liquibase/changelog/initial.yml
+
+  - changeSet:
+      id: create-protobuf-table
+      author: furqan
+      changes:
+        - createTable:
+            tableName: task
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_protobuf_id
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: assignee
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+
+  - changeSet:
+      id: make-id-auto-increment
+      author: furqan
+      changes:
+        - addAutoIncrement:
+            tableName: task
+            columnName: id
+            columnDataType: bigint

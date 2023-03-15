@@ -1,0 +1,43 @@
+include:
+  - type: git
+    repo: https://github.com/Wattpad/go-bundle.git
+    ref: v0.4.0
+    path: batect-grpc-bundle.yml
+
+containers:
+  app:
+    image: golang:1.19
+    volumes:
+      - local: <{batect.project_directory}
+        container: /code
+        options: cached
+      - type: cache
+        name: go-cache
+        container: /go
+      - type: local
+        local: $HOME/.gitconfig
+        container: /home/container-user/.gitconfig
+    environment:
+      GOCACHE: /go/cache
+    working_directory: /code
+    run_as_current_user:
+      enabled: true
+      home_directory: /home/container-user
+
+tasks:
+  run:
+    description: Run the application locally.
+    run:
+      container: app
+      command: go run main.go
+      environment:
+        LOG_LEVEL: debug
+        HTTP_PORT: 8080
+      ports:
+        - local: 8080
+          container: 8080
+  format:
+    description: Format project.
+    run:
+      container: app
+      command: gofmt -s -w .
