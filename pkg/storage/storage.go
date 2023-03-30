@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql" // required for connecting to mysql
 	"github.com/jmoiron/sqlx"
@@ -26,9 +27,9 @@ func NewStorage(db *sql.DB, logger log.Logger, driverName sql.DriverName) (*Stor
 	}, nil
 }
 
-func (s *Storage) CreateTask(ctx context.Context, title, description, status string) (*api.Task, error) {
-	query := "INSERT INTO task(title, description, status) VALUES(?, ?, ?)"
-	result, err := s.DB.ExecContext(ctx, query, title, description, status)
+func (s *Storage) CreateTask(ctx context.Context, title, description, status string, lastUpdated time.Time) (*api.Task, error) {
+	query := "INSERT INTO task(title, description, status, last_updated) VALUES(?, ?, ?, ?)"
+	result, err := s.DB.ExecContext(ctx, query, title, description, status, lastUpdated)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +49,7 @@ func (s *Storage) CreateTask(ctx context.Context, title, description, status str
 	return &task, nil
 }
 
-func (s *Storage) GetTaskByID(ctx context.Context, id int64) (*api.Task, error) {
+func (s *Storage) GetTaskByID(ctx context.Context, id int64) (*model.Task, error) {
 	var task model.Task
 	// functionally equivalent to task := api.Task{}
 
@@ -60,13 +61,7 @@ func (s *Storage) GetTaskByID(ctx context.Context, id int64) (*api.Task, error) 
 		return nil, err
 	}
 
-	return &api.Task{
-		Id:          task.Id,
-		Title:       task.Title,
-		Description: task.Description,
-		Status:      api.TaskStatus(api.TaskStatus_value[task.Status]),
-		Assignee:    task.Assignee,
-	}, nil
+	return &task, nil
 }
 
 func (s *Storage) UpdateTask(ctx context.Context, id int64, title, description, status string) (*api.Task, error) {

@@ -3,6 +3,7 @@ package storage_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
@@ -35,20 +36,20 @@ func (suite *StorageTestSuite) SetupTest() {
 }
 
 func (suite *StorageTestSuite) TestCreateTask() {
-	// TODO Set expectations
+	// Set expectations
 	expectedId := int64(1000001)
 	title := "test_title"
 	description := "test_desc"
 	status := "test_status"
 
-	suite.mock.ExpectExec("INSERT INTO task(title, description, status) VALUES(?, ?, ?)").
+	suite.mock.ExpectExec("INSERT INTO task(title, description, status, last_updated) VALUES(?, ?, ?, ?)").
 		WithArgs(title, description, status).
 		WillReturnResult(sqlmock.NewResult(expectedId, 1))
 
-	// TODO Call the method under test
-	task, err := suite.repo.CreateTask(context.Background(), title, description, status)
+	// Call the method under test
+	task, err := suite.repo.CreateTask(context.Background(), title, description, status, time.Now())
 
-	// TODO Verify method acted as expected
+	// Verify method acted as expected
 	suite.NoError(err)
 	suite.NotNil(task)
 

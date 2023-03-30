@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	api "github.com/Wattpad/TaskManager/api/task_manager"
 	"github.com/Wattpad/TaskManager/pkg/model"
 	"github.com/Wattpad/TaskManager/pkg/storage"
@@ -22,20 +24,17 @@ func NewService(logger log.Logger, db *storage.Storage) *Service {
 
 func (s *Service) CreateTask(ctx context.Context, request *api.CreateTaskRequest) (*api.CreateTaskResponse, error) {
 	var lastUpdated time.Time
-	switch request.GetStatus() {
-	case api.TaskStatus_TASK_STATUS_NOT_STARTED:
-		lastUpdated = request.GetDetails().GetNotStartedDetails().GetCreatedDate().AsTime()
-	case api.TaskStatus_TASK_STATUS_IN_PROGRESS:
-		lastUpdated = request.GetDetails().GetInProgressDetails().GetStartedDate().AsTime()
-		// TODO add DONE handling
+
+	switch details := request.GetDetails().GetDetails().(type) {
+	case *api.TaskDetails_NotStartedDetails:
+		lastUpdated = details.NotStartedDetails.GetCreatedDate().AsTime()
+	case *api.TaskDetails_InProgressDetails:
+		lastUpdated = details.InProgressDetails.GetStartedDate().AsTime()
+	case *api.TaskDetails_DoneDetails:
+		lastUpdated = details.DoneDetails.GetCompletedDate().AsTime()
 	}
 
-	switch request.GetDetails().GetDetails() {
-	case api.TaskDetails_InProgressDetails:
-	}
-
-	// TODO include last updated in DB call
-	task, err := s.db.CreateTask(ctx, request.GetTitle(), request.GetDescription(), request.GetStatus().String())
+	task, err := s.db.CreateTask(ctx, request.GetTitle(), request.GetDescription(), request.GetStatus().String(), lastUpdated)
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +50,40 @@ func (s *Service) GetTask(ctx context.Context, request *api.GetTaskRequest) (*ap
 		return nil, err
 	}
 
+	status := api.TaskStatus(api.TaskStatus_value[task.Status])
+	var details api.TaskDetails
+
+	switch status {
+	case api.TaskStatus_TASK_STATUS_NOT_STARTED:
+		details = api.TaskDetails{
+			Details: &api.TaskDetails_NotStartedDetails{
+				NotStartedDetails: &api.NotStartedDetails{CreatedDate: timestamppb.New(*task.LastUpdated)},
+			},
+		}
+	case api.TaskStatus_TASK_STATUS_IN_PROGRESS:
+		details = api.TaskDetails{
+			Details: &api.TaskDetails_InProgressDetails{
+				InProgressDetails: &api.InProgressDetails{StartedDate: timestamppb.New(*task.LastUpdated)},
+			},
+		}
+	case api.TaskStatus_TASK_STATUS_DONE:
+		details = api.TaskDetails{
+			Details: &api.TaskDetails_DoneDetails{
+				DoneDetails: &api.DoneTaskDetails{CompletedDate: timestamppb.New(*task.LastUpdated)},
+			},
+		}
+	}
+
+	apiTask := api.Task{
+		Id:          task.Id,
+		Title:       task.Title,
+		Description: task.Description,
+		Status:      status,
+		Details:     &details,
+	}
+
 	return &api.GetTaskResponse{
-		Task: task,
+		Task: &apiTask,
 	}, nil
 }
 

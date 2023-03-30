@@ -44,3 +44,14 @@ databaseChangeLog:
             tableName: task
             columnName: id
             columnDataType: bigint
+
+  - changeSet:
+      id: add-last-updated-column
+      author: furqan
+      changes:
+        - addColumn:
+            tableName: task
+            columns:
+              - column:
+                  name: last_updated
+                  type: datetime
