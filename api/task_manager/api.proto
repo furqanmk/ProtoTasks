@@ -83,11 +83,31 @@ message GetAllTasksResponse {
   Task task = 1;
 }
 
+message GetCacheRequest {
+  string last_name = 1;
+}
+
+message GetCacheResponse {
+  string last_name = 1;
+  string birthday = 2;
+}
+
+message SetCacheRequest {
+  string last_name = 1;
+  string birthday = 2;
+}
+
+message SetCacheResponse {
+  bool success = 1;
+}
+
 service TaskService {
   rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse) {}
   rpc GetTask(GetTaskRequest) returns (GetTaskResponse) {}
   rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse) {}
   rpc DeleteTask(DeleteTaskRequest) returns (DeleteTaskResponse) {}
+  rpc GetCache(GetCacheRequest) returns (GetCacheResponse) {}
+  rpc SetCache(SetCacheRequest) returns (SetCacheResponse) {}
   rpc GetAllTasks(GetAllTasksRequest) returns (stream GetAllTasksResponse) {}
   // rpc AssignTask(AssignTaskRequest) returns (AssignTaskResponse) {}
 }
