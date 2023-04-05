@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/Wattpad/wsl v1.0.0
+	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/stretchr/testify v1.8.0

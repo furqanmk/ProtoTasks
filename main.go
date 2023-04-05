@@ -26,5 +26,6 @@ func main() {
 		service.NewService,
 		sql.Module("taskmanager"),
 		storage.NewStorage,
+		storage.NewMemcached,
 	).Run()
 }

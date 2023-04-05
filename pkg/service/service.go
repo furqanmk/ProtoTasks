@@ -15,11 +15,12 @@ import (
 type Service struct {
 	logger log.Logger
 	db     *storage.Storage
+	cache  *storage.Cache
 	api.UnimplementedTaskServiceServer
 }
 
-func NewService(logger log.Logger, db *storage.Storage) *Service {
-	return &Service{logger: logger, db: db}
+func NewService(logger log.Logger, db *storage.Storage, cache *storage.Cache) *Service {
+	return &Service{logger: logger, db: db, cache: cache}
 }
 
 func (s *Service) CreateTask(ctx context.Context, request *api.CreateTaskRequest) (*api.CreateTaskResponse, error) {
@@ -141,4 +142,27 @@ func (s *Service) GetAllTasks(request *api.GetAllTasksRequest, tasksStream api.T
 	}
 
 	return nil
+}
+
+func (s *Service) GetCache(ctx context.Context, request *api.GetCacheRequest) (*api.GetCacheResponse, error) {
+	template, err := s.cache.FetchTemplate(request.GetLastName())
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.GetCacheResponse{
+		LastName: template.LastName,
+		Birthday: template.Birthday,
+	}, nil
+}
+
+func (s *Service) SetCache(ctx context.Context, request *api.SetCacheRequest) (*api.SetCacheResponse, error) {
+	err := s.cache.CacheTemplate(&storage.Template{
+		LastName: request.LastName,
+		Birthday: request.Birthday,
+	})
+
+	return &api.SetCacheResponse{
+		Success: err != nil,
+	}, nil
 }
