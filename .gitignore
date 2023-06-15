@@ -1,3 +1,5 @@
 TaskManager
 .idea/*
 *.pb.go
+vendor
+deploy
