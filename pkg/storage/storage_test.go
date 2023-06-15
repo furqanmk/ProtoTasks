@@ -9,6 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/Wattpad/TaskManager/api/task_manager"
 	"github.com/Wattpad/TaskManager/pkg/storage"
 	"github.com/Wattpad/wsl/log"
 )
@@ -40,14 +41,15 @@ func (suite *StorageTestSuite) TestCreateTask() {
 	expectedId := int64(1000001)
 	title := "test_title"
 	description := "test_desc"
-	status := "test_status"
+	status := task_manager.TaskStatus_TASK_STATUS_NOT_STARTED
+	now := time.Now()
 
 	suite.mock.ExpectExec("INSERT INTO task(title, description, status, last_updated) VALUES(?, ?, ?, ?)").
-		WithArgs(title, description, status).
+		WithArgs(title, description, status.String(), now).
 		WillReturnResult(sqlmock.NewResult(expectedId, 1))
 
 	// Call the method under test
-	task, err := suite.repo.CreateTask(context.Background(), title, description, status, time.Now())
+	task, err := suite.repo.CreateTask(context.Background(), title, description, status.String(), now)
 
 	// Verify method acted as expected
 	suite.NoError(err)
@@ -88,13 +90,13 @@ func (suite *StorageTestSuite) TestUpdateTask() {
 	id := int64(1000001)
 	title := "updated_title"
 	description := "updated_desc"
-	status := "updated_status"
+	status := task_manager.TaskStatus_TASK_STATUS_IN_PROGRESS
 
 	suite.mock.ExpectExec("UPDATE task SET title = ?, description = ?, status = ? WHERE id = ?").
-		WithArgs(title, description, status, id).
+		WithArgs(title, description, status.String(), id).
 		WillReturnResult(sqlmock.NewResult(id, 1))
 
-	task, err := suite.repo.UpdateTask(context.Background(), id, title, description, status)
+	task, err := suite.repo.UpdateTask(context.Background(), id, title, description, status.String())
 
 	suite.NoError(err)
 	suite.NotNil(task)
